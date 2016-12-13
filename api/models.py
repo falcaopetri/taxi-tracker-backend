@@ -14,3 +14,27 @@ class Motorista(models.Model):
     senha = models.CharField(max_length=8) # TODO confirmar requisito: qual o tamanho máximo da senha?
    
 
+class Cooperativa(models.Model):
+    nome = models.CharField(max_length=200)
+    endereco = models.CharField(max_length=200)
+    telefone = models.CharField(max_length=10)
+    login = models.CharField(max_length=20)
+    senha = models.CharField(max_length=30)
+
+
+class Veiculo(models.Model):
+    LICENCIADO = 'licenciado'
+    NLICENCIADO = 'n_licenciado'
+    STATUS_CHOICES = (
+        (LICENCIADO, 'Licenciado'),
+        (NLICENCIADO,  'Não Licenciado'),
+    )
+    modelo  = models.CharField(max_length=200)
+    marca  = models.CharField(max_length=200)
+    status = models.CharField(
+        max_length=20,
+        choices = STATUS_CHOICES,
+        default=NLICENCIADO
+    )
+
+
