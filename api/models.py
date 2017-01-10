@@ -66,10 +66,11 @@ class Corrida(models.Model):
     destino = models.CharField(max_length=200)
     valor = models.FloatField(default=0.0)	
     horarioInicial = models.DateField(null=True, blank=True)
-    horarioFianl = models.DateField(null=True, blank=True)
+    horarioFinal = models.DateField(null=True, blank=True)
     pontuacao = models.FloatField(default=0.0)
     motorista = models.ForeignKey('Motorista')
     passageiro = models.ForeignKey('Passageiro')
+
 
 class Passageiro(models.Model):
 	login = models.CharField(max_length=200)
