@@ -12,7 +12,8 @@ class Motorista(models.Model):
     # TODO plain-text password storing -> really bad idea
     # Check [Password management in Django](https://docs.djangoproject.com/en/1.9/topics/auth/passwords/)
     senha = models.CharField(max_length=8) # TODO confirmar requisito: qual o tamanho máximo da senha?
-   
+    cooperativa = models.ForeignKey('Cooperativa', default = "")
+    statusMotorista = models.BooleanField(default=True) 
 
 class Cooperativa(models.Model):
     nome = models.CharField(max_length=200)
@@ -36,5 +37,44 @@ class Veiculo(models.Model):
         choices = STATUS_CHOICES,
         default=NLICENCIADO
     )
+    cooperativa = models.ForeignKey('Cooperativa', default = "")
+
+class Uso(models.Model):
+	dataInicio = models.DateField(null=True, blank=True)
+	dataInicio = models.DateField(null=True, blank=True)
+	veiculo = models.ForeignKey('Veiculo', default = "")
+	motorista = models.ForeignKey('Motorista', default = "")
+	
+	
+class Corrida(models.Model):
+    ESPERA = 'em_espera'
+    CANCELADA = 'cancelada'
+    INICIADA = 'iniciada'
+    FINALIZADA = 'finalizada'
+    STATUS_CHOICES = (
+        (ESPERA, 'Em Espera'),
+        (CANCELADA, 'Cancelada'),
+        (INICIADA, 'Iniciada'),
+        (FINALIZADA, 'Finalizada'),
+    )
+    status = models.CharField(
+        max_length=20,
+        choices = STATUS_CHOICES, 
+        default = ESPERA
+    )
+    origem = models.CharField(max_length=200)
+    destino = models.CharField(max_length=200)
+    valor = models.FloatField(default=0.0)	
+    horarioInicial = models.DateField(null=True, blank=True)
+    horarioFianl = models.DateField(null=True, blank=True)
+    pontuacao = models.FloatField(default=0.0)
+    motorista = models.ForeignKey('Motorista', default = "")
+    passageiro = models.ForeignKey('Passageiro', default = "")
+
+class Passageiro(models.Model):
+	login = models.CharField(max_length=200)
+	senha =  models.CharField(max_length=200)
 
 
+	
+	
