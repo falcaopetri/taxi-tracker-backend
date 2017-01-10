@@ -22,6 +22,8 @@ from api import views
 
 router = DefaultRouter()
 router.register(r'motoristas', views.MotoristaViewSet)
+router.register(r'passageiros', views.PassageiroViewSet)
+router.register(r'corridas', views.CorridaViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),
