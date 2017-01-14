@@ -13,8 +13,10 @@ class Motorista(models.Model):
     # TODO plain-text password storing -> really bad idea
     # Check [Password management in Django](https://docs.djangoproject.com/en/1.9/topics/auth/passwords/)
     senha = models.CharField(max_length=8) # TODO confirmar requisito: qual o tamanho máximo da senha?
-    cooperativa = models.ForeignKey('Cooperativa')
+    cooperativa = models.ForeignKey('Cooperativa',  on_delete=models.CASCADE)
     statusMotorista = models.BooleanField(default=True) 
+    def __str__(self):
+        return self.nome
 
 class Cooperativa(models.Model):
     nome = models.CharField(max_length=200)
@@ -22,6 +24,8 @@ class Cooperativa(models.Model):
     telefone = models.CharField(max_length=10)
     login = models.CharField(max_length=20)
     senha = models.CharField(max_length=30)
+    def __str__(self):
+        return self.nome
 
 
 class Veiculo(models.Model):
@@ -38,13 +42,16 @@ class Veiculo(models.Model):
         choices = STATUS_CHOICES,
         default=NLICENCIADO
     )
-    cooperativa = models.ForeignKey('Cooperativa')
+    cooperativa = models.ForeignKey('Cooperativa', on_delete=models.CASCADE)
+    def __str__(self):
+        return self.modelo
 
 class Uso(models.Model):
 	dataInicio = models.DateField(null=True, blank=True)
 	dataInicio = models.DateField(null=True, blank=True)
-	veiculo = models.ForeignKey('Veiculo', default = "")
-	motorista = models.ForeignKey('Motorista')
+
+	veiculo = models.ForeignKey('Veiculo', on_delete=models.CASCADE)
+	motorista = models.ForeignKey('Motorista', on_delete=models.CASCADE)
 	
 	
 class Corrida(models.Model):
@@ -63,12 +70,17 @@ class Corrida(models.Model):
         choices = STATUS_CHOICES, 
         default = ESPERA
     )
+
     origem = models.CharField(max_length=200)
     destino = models.CharField(max_length=200)
+
     valor = models.FloatField(default=0.0)	
+
     horarioInicial = models.DateField(null=True, blank=True)
     horarioFinal = models.DateField(null=True, blank=True)
+
     pontuacao = models.FloatField(default=0.0)
+
     motorista = models.ForeignKey('Motorista')
     passageiro = models.ForeignKey('Passageiro')
 
@@ -77,4 +89,3 @@ class Passageiro(models.Model):
     # login = models.CharField(max_length=200)
     # senha =  models.CharField(max_length=200)
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-
