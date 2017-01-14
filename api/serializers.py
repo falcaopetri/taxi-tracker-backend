@@ -9,9 +9,12 @@ class MotoristaSerializer(serializers.ModelSerializer):
 
 
 class PassageiroSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username')
+    email = serializers.CharField(source='user.email')
+
     class Meta:
         model = Passageiro
-        fields = ('login', )
+        fields = ('username', 'email')
 
 
 class CorridaSerializer(serializers.ModelSerializer):

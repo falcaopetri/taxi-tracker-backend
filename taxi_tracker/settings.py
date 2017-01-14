@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken', # https://github.com/Tivix/django-rest-auth/issues/5
     'api',
 ]
 
@@ -135,3 +136,6 @@ STATICFILES_DIRS = [
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# TODO remove CLIENT_ID from versioning
+CLIENT_ID = '407408718192.apps.googleusercontent.com'

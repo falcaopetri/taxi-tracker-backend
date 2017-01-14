@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Motorista(models.Model):
@@ -73,9 +74,7 @@ class Corrida(models.Model):
 
 
 class Passageiro(models.Model):
-	login = models.CharField(max_length=200)
-	senha =  models.CharField(max_length=200)
+    # login = models.CharField(max_length=200)
+    # senha =  models.CharField(max_length=200)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
-
-	
-	
