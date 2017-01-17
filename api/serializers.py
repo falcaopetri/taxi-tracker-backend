@@ -5,7 +5,7 @@ from api.models import *
 class MotoristaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Motorista
-        fields = ('nome', 'pontuacao')
+        fields = ('nome', 'pontuacao', 'is_busy')
 
 
 class PassageiroSerializer(serializers.ModelSerializer):
@@ -21,3 +21,4 @@ class CorridaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Corrida
         fields = ('status', 'origem', 'destino', 'valor', 'horarioInicial', 'horarioFinal', 'motorista', 'passageiro')
+        read_only_fields = ('status', 'valor', 'horarioInicial', 'horarioFinal', 'motorista', 'passageiro')

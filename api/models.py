@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.timezone import localtime, now
 
 
 class Motorista(models.Model):
@@ -15,8 +16,17 @@ class Motorista(models.Model):
     senha = models.CharField(max_length=8) # TODO confirmar requisito: qual o tamanho máximo da senha?
     cooperativa = models.ForeignKey('Cooperativa',  on_delete=models.CASCADE)
     statusMotorista = models.BooleanField(default=True) 
+
     def __str__(self):
         return self.nome
+
+    @property
+    def is_busy(self):
+        corridas_espera = self.corrida_set.filter(status=Corrida.ESPERA)
+        corridas_iniciada = self.corrida_set.filter(status=Corrida.INICIADA)
+
+        return len(corridas_espera) == 0 and len(corridas_iniciada) == 0
+
 
 class Cooperativa(models.Model):
     nome = models.CharField(max_length=200)
@@ -54,6 +64,12 @@ class Uso(models.Model):
 	motorista = models.ForeignKey('Motorista', on_delete=models.CASCADE)
 	
 	
+class Passageiro(models.Model):
+    # login = models.CharField(max_length=200)
+    # senha =  models.CharField(max_length=200)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+
+    
 class Corrida(models.Model):
     ESPERA = 'em_espera'
     CANCELADA = 'cancelada'
@@ -81,11 +97,6 @@ class Corrida(models.Model):
 
     pontuacao = models.FloatField(default=0.0)
 
-    motorista = models.ForeignKey('Motorista')
-    passageiro = models.ForeignKey('Passageiro')
+    motorista = models.ForeignKey(Motorista, null=True)
+    passageiro = models.ForeignKey(Passageiro, null=True)
 
-
-class Passageiro(models.Model):
-    # login = models.CharField(max_length=200)
-    # senha =  models.CharField(max_length=200)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
