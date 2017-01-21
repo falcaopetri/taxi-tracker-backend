@@ -138,4 +138,4 @@ STATICFILES_DIRS = [
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # TODO remove CLIENT_ID from versioning
-CLIENT_ID = '407408718192.apps.googleusercontent.com'
+CLIENT_ID = '807432336747-7l4qr0urml43df50io608ts2l2gmqdj9.apps.googleusercontent.com'

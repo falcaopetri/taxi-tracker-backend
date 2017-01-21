@@ -14,7 +14,9 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_202_ACCEPTED
 
 
-from oauth2client import client, crypt
+# from oauth2client import client, crypt
+import google.oauth2.id_token 
+import google.auth.transport.requests
 
 from api.models import *
 from api.serializers import *
@@ -68,42 +70,54 @@ class CorridaViewSet(viewsets.ModelViewSet):
 
 
 class Login(APIView):
-	# Source: http://jyotman94.pythonanywhere.com/entry/token-based-authentication-using-django-rest-framework
-	def verifyGoogleToken(self, idToken):
-		isIdTokenValid = True
-		try:
-			idinfo = client.verify_id_token(idToken, settings.CLIENT_ID)
-			if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
-				raise crypt.AppIdentityError("Wrong issuer.")
-		except crypt.AppIdentityError:
-			# Invalid token
-			isIdTokenValid = False
-			idinfo = {
-				'Response' : 'Invalid Google Token!',
-			}
-		return (isIdTokenValid, idinfo)
+    # Source: http://jyotman94.pythonanywhere.com/entry/token-based-authentication-using-django-rest-framework
+    def verifyGoogleToken(self, idToken):
+        isIdTokenValid = True
+        try:
+            idinfo = client.verify_id_token(idToken, settings.CLIENT_ID)
+            if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+                raise crypt.AppIdentityError("Wrong issuer.")
+        except crypt.AppIdentityError:
+            # Invalid token
+            isIdTokenValid = False
+            idinfo = {
+                'Response' : 'Invalid Google Token!',
+            }
+        return (isIdTokenValid, idinfo)
 
-	def post(self, request, format=None):
-		isIdTokenValid, googleResponse = self.verifyGoogleToken(request.data.get('id_token'))
-		if isIdTokenValid:
-			try:
-				user = User.objects.get(email=googleResponse.get('email'))
-				token = Token.objects.get(user=user)
-				statusCode = HTTP_202_ACCEPTED
-			except User.DoesNotExist:
-				user = User.objects.create(username=googleResponse.get('name'), email=googleResponse.get('email'))
-				passageiro = Passageiro.objects.create(user=user)
-				token = Token.objects.create(user=user)
-				statusCode = HTTP_201_CREATED
-			#except Token.DoesNotExist:
-			#	token = Token.objects.create(user=user)
-			#	statusCode = HTTP_201_CREATED
+    # Source: https://cloud.google.com/appengine/docs/python/authenticating-users-firebase-appengine#verifying_tokens_on_the_server
+    def verifyFirebaseToken(self, idToken):
+        # Source: https://github.com/GoogleCloudPlatform/python-docs-samples/blob/master/appengine/standard/firebase/firenotes/backend/main.py#L28
+        HTTP_REQUEST = google.auth.transport.requests.Request()
 
-			additionalContent = {
-				'token' : token.key,
-				}
-			googleResponse.update(additionalContent)
-			return Response(googleResponse, statusCode)
-		else:
-			return Response(googleResponse, status=HTTP_400_BAD_REQUEST)
+        claims = google.oauth2.id_token.verify_firebase_token(
+                    idToken, HTTP_REQUEST)
+        if claims:
+            return (True, claims)
+        else:
+            return (False, { 'Response': 'Invalid Google Token' } )
+
+
+    def post(self, request, format=None):
+        #isIdTokenValid, googleResponse = self.verifyGoogleToken(request.data.get('id_token'))
+        isIdTokenValid, googleResponse = self.verifyFirebaseToken(request.data.get('id_token'))
+        if isIdTokenValid:
+            try:
+                user = User.objects.get(email=googleResponse.get('email'))
+                token = Token.objects.get(user=user)
+                statusCode = HTTP_202_ACCEPTED
+            except User.DoesNotExist:
+                user = User.objects.create(username=googleResponse.get('name'), email=googleResponse.get('email'))
+                passageiro = Passageiro.objects.create(user=user)
+                token = Token.objects.create(user=user)
+                statusCode = HTTP_201_CREATED
+
+            additionalContent = {
+                'token' : token.key,
+            }
+
+            googleResponse.update(additionalContent)
+            return Response(googleResponse, statusCode)
+        else:
+            return Response(googleResponse, status=HTTP_400_BAD_REQUEST)
 
