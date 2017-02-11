@@ -11,10 +11,6 @@ class Motorista(models.Model):
     cnh = models.CharField(max_length=11) # TODO confirmar que CNH só tem 11 dígitos
     pontuacao = models.FloatField()
 
-    # TODO plain-text password storing -> really bad idea
-    # Check [Password management in Django](https://docs.djangoproject.com/en/1.9/topics/auth/passwords/)
-    senha = models.CharField(max_length=8) # TODO confirmar requisito: qual o tamanho máximo da senha?
-    cooperativa = models.ForeignKey('Cooperativa',  on_delete=models.CASCADE)
     statusMotorista = models.BooleanField(default=True) 
 
     def __str__(self):
@@ -65,8 +61,6 @@ class Uso(models.Model):
 	
 	
 class Passageiro(models.Model):
-    # login = models.CharField(max_length=200)
-    # senha =  models.CharField(max_length=200)
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
     

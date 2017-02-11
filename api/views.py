@@ -40,7 +40,7 @@ class CorridaViewSet(viewsets.ModelViewSet):
     queryset = Corrida.objects.all()
     serializer_class = CorridaSerializer
     permission_classes = (permissions.IsAuthenticated, )
-    #authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,)
 
     def create(self,request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
