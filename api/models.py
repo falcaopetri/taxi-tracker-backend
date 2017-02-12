@@ -4,17 +4,19 @@ from django.utils.timezone import localtime, now
 
 
 class Motorista(models.Model):
-    nome = models.CharField(max_length=200)
-    cpf = models.CharField(max_length=11) # TODO como adicionar máscara? (AAA.BBB.CCC-DD)
-    celular = models.CharField(max_length=11) # TODO como adicionar máscara? ( (AA) BCCCC-DDDD )
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    cpf = models.CharField(max_length=11, default='') # TODO como adicionar máscara? (AAA.BBB.CCC-DD)
+    celular = models.CharField(max_length=11, default='') # TODO como adicionar máscara? ( (AA) BCCCC-DDDD )
     # TODO campo endereço de mensagem instantânea: tipo int?
-    cnh = models.CharField(max_length=11) # TODO confirmar que CNH só tem 11 dígitos
-    pontuacao = models.FloatField()
+    cnh = models.CharField(max_length=11, default='') # TODO confirmar que CNH só tem 11 dígitos
+    pontuacao = models.FloatField(default=-1)
 
     statusMotorista = models.BooleanField(default=True) 
 
+    lastKnownLocation = models.CharField(max_length=50, default='')
+
     def __str__(self):
-        return self.nome
+        return self.user.username
 
     @property
     def is_busy(self):
@@ -63,6 +65,11 @@ class Uso(models.Model):
 class Passageiro(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
+    def has_active_race(self):
+        corridas_espera = self.corrida_set.filter(status=Corrida.ESPERA)
+        corridas_iniciada = self.corrida_set.filter(status=Corrida.INICIADA)
+
+        return len(corridas_espera) == 0 and len(corridas_iniciada) == 0
     
 class Corrida(models.Model):
     ESPERA = 'em_espera'

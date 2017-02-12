@@ -3,9 +3,12 @@ from rest_framework import serializers
 from api.models import *
 
 class MotoristaSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username')
+    email = serializers.CharField(source='user.email')
+
     class Meta:
         model = Motorista
-        fields = ('nome', 'pontuacao', 'is_busy')
+        fields = ('username', 'email', 'pontuacao', 'is_busy')
 
 
 class PassageiroSerializer(serializers.ModelSerializer):

@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, list_route
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.exceptions import NotAcceptable
 
@@ -28,6 +28,21 @@ class MotoristaViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated, )
     authentication_classes = (TokenAuthentication,)
 
+    @list_route(methods=['get'])
+    def refresh(self, request):
+        user = request.user
+        driver = Motorista.objects.get(user=user)
+        try:
+            corrida = driver.corrida_set.get(status=Corrida.ESPERA)
+        except Corrida.DoesNotExist:
+            return Response({'message': 'nenhuma corrida'})
+
+        serializer = CorridaSerializer(data=corrida)
+        if serializer.is_valid():
+            return Response(serializer.serializer('json'))
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
 
 class PassageiroViewSet(viewsets.ModelViewSet):
     queryset = Passageiro.objects.all()
@@ -63,10 +78,13 @@ class CorridaViewSet(viewsets.ModelViewSet):
         user = get_object_or_404(Passageiro, user=self.request.user)
         driver = util.get_available_driver()
 
+        if user.has_active_race():
+            raise NotAcceptable({"message": "Usuário já está em uma corrida."})
+
         if driver:
             serializer.save(passageiro=user, motorista=driver)
         else:
-            raise NotAcceptable({"message": "Nenhum motorista disponível"})
+            raise NotAcceptable({"message": "Nenhum motorista disponível."})
 
     def create(self,request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -130,11 +148,17 @@ class Login(APIView):
         if isIdTokenValid:
             try:
                 user = User.objects.get(email=googleResponse.get('email'))
+
                 token = Token.objects.get(user=user)
                 statusCode = HTTP_202_ACCEPTED
             except User.DoesNotExist:
                 user = User.objects.create(username=googleResponse.get('name'), email=googleResponse.get('email'))
-                passageiro = Passageiro.objects.create(user=user)
+
+                if request.data.get('tipo') == 'PASSAGEIRO':
+                    passageiro = Passageiro.objects.create(user=user)
+                elif request.data.get('tipo') == 'MOTORISTA':
+                    motorista = Motorista.objects.create(user=user,)
+
                 token = Token.objects.create(user=user)
                 statusCode = HTTP_201_CREATED
 
