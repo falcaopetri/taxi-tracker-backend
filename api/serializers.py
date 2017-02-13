@@ -21,7 +21,9 @@ class PassageiroSerializer(serializers.ModelSerializer):
 
 
 class CorridaSerializer(serializers.ModelSerializer):
+    motorista_location = serializers.CharField(source='motorista.lastKnownLocation', default='')
+
     class Meta:
         model = Corrida
-        fields = ('status', 'origem', 'destino', 'valor', 'horarioInicial', 'horarioFinal', 'motorista', 'passageiro')
+        fields = ('status', 'origem', 'destino', 'valor', 'horarioInicial', 'horarioFinal', 'motorista', 'passageiro', 'motorista_location')
         read_only_fields = ('status', 'valor', 'horarioInicial', 'horarioFinal', 'motorista', 'passageiro')

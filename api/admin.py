@@ -4,7 +4,6 @@ from .models import *
 
 # Register your models here.
 admin.site.register(Motorista)
-admin.site.register(Cooperativa)
 admin.site.register(Veiculo)
 admin.site.register(Corrida)
 admin.site.register(Passageiro)

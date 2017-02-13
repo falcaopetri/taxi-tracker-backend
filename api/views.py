@@ -28,21 +28,27 @@ class MotoristaViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated, )
     authentication_classes = (TokenAuthentication,)
 
-    @list_route(methods=['get'])
+    @list_route(methods=['post'])
     def refresh(self, request):
         user = request.user
         driver = Motorista.objects.get(user=user)
+        if request.data.get('curr_pos'):
+            driver.lastKnownLocation = request.data.get('curr_pos')
+            driver.save()
+
         try:
-            corrida = driver.corrida_set.get(status=Corrida.ESPERA)
+            corrida = driver.corrida_set.filter(status=Corrida.ESPERA)
+
+            if len(corrida) == 0:
+                raise Corrida.DoesNotExist()
+            else:
+                corrida = corrida[0]
+
         except Corrida.DoesNotExist:
             return Response({'message': 'nenhuma corrida'})
 
-        serializer = CorridaSerializer(data=corrida)
-        if serializer.is_valid():
-            return Response(serializer.serializer('json'))
-        else:
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+        serializer = CorridaSerializer(corrida)
+        return Response(serializer.data)
 
 class PassageiroViewSet(viewsets.ModelViewSet):
     queryset = Passageiro.objects.all()
@@ -50,6 +56,24 @@ class PassageiroViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated, )
     authentication_classes = (TokenAuthentication,)
 
+    @list_route(methods=['post'])
+    def refresh(self, request):
+        user = request.user
+        passageiro = Passageiro.objects.get(user=user)
+
+        try:
+            corrida = passageiro.corrida_set.filter(status=Corrida.ESPERA)
+
+            if len(corrida) == 0:
+                raise Corrida.DoesNotExist()
+            else:
+                corrida = corrida[0]
+
+        except Corrida.DoesNotExist:
+            return Response({'message': 'nenhuma corrida'})
+
+        serializer = CorridaSerializer(corrida)
+        return Response(serializer.data)
 
 class CorridaViewSet(viewsets.ModelViewSet):
     queryset = Corrida.objects.all()

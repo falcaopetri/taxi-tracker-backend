@@ -26,15 +26,6 @@ class Motorista(models.Model):
         return len(corridas_espera) == 0 and len(corridas_iniciada) == 0
 
 
-class Cooperativa(models.Model):
-    nome = models.CharField(max_length=200)
-    endereco = models.CharField(max_length=200)
-    telefone = models.CharField(max_length=10)
-    login = models.CharField(max_length=20)
-    senha = models.CharField(max_length=30)
-    def __str__(self):
-        return self.nome
-
 
 class Veiculo(models.Model):
     LICENCIADO = 'licenciado'
@@ -50,7 +41,6 @@ class Veiculo(models.Model):
         choices = STATUS_CHOICES,
         default=NLICENCIADO
     )
-    cooperativa = models.ForeignKey('Cooperativa', on_delete=models.CASCADE)
     def __str__(self):
         return self.modelo
 
